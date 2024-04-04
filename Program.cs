@@ -20,7 +20,11 @@ namespace TestCICDIH
             //if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My service");
+                    //c.RoutePrefix = string.Empty;  // Set Swagger UI at apps root
+                });
             }
 
             app.UseHttpsRedirection();
