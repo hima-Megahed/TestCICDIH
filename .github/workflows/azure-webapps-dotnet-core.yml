@@ -66,8 +66,9 @@ jobs:
 
   slots-swapping:
     name: "Swapping Pre-Production & Production Slots"
+    runs-on: windows-latest
     environment:
-      name: ${{env.PRODUCTION_ENV_NAME}}
+      name: ${{ env.PRODUCTION_ENV_NAME }}
 
     steps:
       - name: Set up Azure CLI
