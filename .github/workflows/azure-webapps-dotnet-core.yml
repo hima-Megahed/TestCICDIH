@@ -26,7 +26,6 @@ env:
   AZURE_PROD_SLOT: Production
   AZURE_RS_GROUP: TST-RG
   STAGING_ENV_NAME: Staging
-  PRODUCTION_ENV_NAME: Production
 
 on:
   push:
@@ -68,7 +67,7 @@ jobs:
     name: "Swapping Pre-Production & Production Slots"
     runs-on: windows-latest
     environment:
-      name: ${{ env.PRODUCTION_ENV_NAME }}
+      name: "Production"
 
     steps:
       - name: Set up Azure CLI
