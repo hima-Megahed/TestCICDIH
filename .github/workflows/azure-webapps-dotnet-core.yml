@@ -20,23 +20,27 @@
 name: Build and deploy ASP.Net Core app to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: your-app-name    # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x'                 # set this to the .NET Core version to use
+  AZURE_API_APPLICATION_NAME: ih-tst-api # set this to the name of your Azure Web App
+  DOTNET_VERSION: "8.0.x" # set this to the .NET Core version to use
+  AZURE_STAGING_SLOT: Staging
+  AZURE_PROD_SLOT: Production
+  AZURE_RS_GROUP: TST-RG
+  STAGING_ENV_NAME: Staging
+  PRODUCTION_ENV_NAME: Production
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment:
-      name: 'Staging'
-      
+      name: "Staging"
+      url: ${{ steps.backend-preprod-deployment.outputs.webapp-url }}
     steps:
       - uses: actions/checkout@v3
 
@@ -45,45 +49,32 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set up dependency caching for faster builds
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
-
-  deploy:
-    permissions:
-      contents: none
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Staging'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: .net-app
-
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+        id: backend-preprod-deployment
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          app-name: ${{ env.AZURE_API_APPLICATION_NAME }}
+          slot-name: ${{ env.AZURE_STAGING_SLOT }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_API_PUBLISH_PROFILE }}
+          package: ${{env.DOTNET_ROOT}}/myapp
+
+  slots-swapping:
+    name: "Swapping Pre-Production & Production Slots"
+    environment:
+      name: ${{env.PRODUCTION_ENV_NAME}}
+
+    steps:
+      - name: Set up Azure CLI
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Swap API Slots
+        run: |
+          az webapp deployment slot swap -g ${{ env.AZURE_RS_GROUP }} -n ${{ env.AZURE_API_APPLICATION_NAME }} --slot ${{ env.AZURE_STAGING_SLOT }} --target-slot ${{ env.AZURE_PROD_SLOT }}
