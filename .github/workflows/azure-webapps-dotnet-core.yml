@@ -20,7 +20,7 @@
 name: Build and deploy ASP.Net Core app to an Azure Web App
 
 env:
-  AZURE_API_APPLICATION_NAME: ih-tst-api # set this to the name of your Azure Web App
+  AZURE_API_APPLICATION_NAME: ih-tst-api-v1 # set this to the name of your Azure Web App
   DOTNET_VERSION: "8.0.x" # set this to the .NET Core version to use
   AZURE_STAGING_SLOT: Staging
   AZURE_PROD_SLOT: Production
