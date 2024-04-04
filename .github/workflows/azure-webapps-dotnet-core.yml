@@ -66,6 +66,7 @@ jobs:
   slots-swapping:
     name: "Swapping Pre-Production & Production Slots"
     runs-on: windows-latest
+    needs: ["build"]
     environment:
       name: "Production"
 
