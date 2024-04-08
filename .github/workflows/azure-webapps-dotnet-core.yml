@@ -52,7 +52,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}\myapp
+        run: dotnet publish -c Release -o ./myapp
 
       - name: Deploy to Azure Web App
         id: backend-preprod-deployment
@@ -61,7 +61,7 @@ jobs:
           slot-name: ${{ env.AZURE_STAGING_SLOT }}
           app-name: ${{ env.AZURE_API_APPLICATION_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_API_STAGING_PUBLISH_PROFILE }}
-          package: ${{env.DOTNET_ROOT}}\myapp
+          package: ./myapp
 
       - name: Set up Azure CLI
         uses: azure/login@v2
