@@ -21,7 +21,7 @@ namespace TestCICDIH.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public IActionResult Get()
         {
-            return Ok("V6");
+            return Ok("V7");
         }
     }
 }
