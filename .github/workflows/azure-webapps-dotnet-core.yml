@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment:
       name: "Staging"
       url: ${{ steps.backend-preprod-deployment.outputs.webapp-url }}
@@ -63,20 +63,12 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_API_STAGING_PUBLISH_PROFILE }}
           package: ${{env.DOTNET_ROOT}}\myapp
 
-  slots-swapping:
-    name: "Swapping Pre-Production & Production Slots"
-    runs-on: ubuntu-latest
-    needs: ["build"]
-    environment:
-      name: "Production"
-
-    steps:
       - name: Set up Azure CLI
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Swap API Slots
+      - name: Swapping API Slots
         uses: azure/CLI@v1
         with:
           azcliversion: latest
